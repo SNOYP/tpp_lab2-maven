@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Maven Калькулятор</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #ffffff;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 20px 0;
+        }
+
+        div {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #cccccc;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            color: #ffffff;
+            border-radius: 4px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #555;
+        }
+
+        button {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        .result-container {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            max-width: 600px;
+        }
+
+        .result-container h2 {
+            margin-top: 0;
+            color: #66aaff;
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+<h1>Програма-Калькулятор</h1>
+
+<form th:action="@{/calculate}" method="post">
+    <div>
+        <label for="expression">Введіть математичний вираз:</label>
+
+        <input type="text" id="expression" name="expression"
+               th:value="${lastExpression}" required>
+    </div>
+
+    <button type="submit">Обчислити</button>
+</form>
+
+<div class="result-container">
+    <h2>Відповідь:</h2>
+    <p th:text="${result}">Введіть вираз для обчислення</p>
+</div>
+
+</body>
+</html>
