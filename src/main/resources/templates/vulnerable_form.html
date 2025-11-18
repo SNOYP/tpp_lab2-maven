@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Демонстрація SQL Injection</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #e0e0e0; margin: 0; padding: 20px; line-height: 1.6; }
+        .container { max-width: 700px; margin: 0 auto; background-color: #1e1e1e; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); }
+        h1 { color: #dc3545; text-align: center; border-bottom: 2px solid #dc3545; padding-bottom: 10px; margin-bottom: 30px; }
+        .warning { color: #ffc107; background-color: #3e2723; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #ff9800; font-weight: bold; }
+        textarea { width: 100%; padding: 10px; border: 1px solid #555; border-radius: 4px; box-sizing: border-box; background-color: #333; color: #f0f0f0; min-height: 100px; font-family: monospace; }
+        button { background-color: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        button:hover { background-color: #c82333; }
+        .result-box { margin-top: 30px; padding: 15px; border-radius: 5px; background-color: #2a2a2a; border-left: 5px solid #00bcd4; }
+        .result-box h2 { color: #00bcd4; margin-top: 0; }
+        .result-box p, pre { white-space: pre-wrap; word-break: break-all; color: #f0f0f0; margin: 0; }
+        .examples { margin-top: 30px; padding: 15px; border-radius: 5px; background-color: #2a2a2a; border-left: 5px solid #ff9800; }
+        .examples code { background-color: #333; padding: 2px 4px; border-radius: 3px; color: #f0f0f0; }
+        .footer-link { text-align: center; margin-top: 30px; }
+        .footer-link a { color: #00bcd4; text-decoration: none; transition: color 0.3s; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>❌ Демонстрація SQL Injection</h1>
+
+    <div class="warning">
+        УВАГА! Цей інтерфейс уразливий, оскільки використовує <strong>java.sql.Statement</strong> для виконання SQL-запитів без параметризації.
+    </div>
+
+    <form action="/vulnerable/execute" method="post">
+        <label for="query">Введіть **повний** SQL-запит:</label>
+        <textarea id="query" name="query" th:text="${query}" placeholder="Наприклад: SELECT * FROM groups;"></textarea>
+        <button type="submit">Виконати SQL</button>
+    </form>
+
+    <div class="result-box">
+        <h2>Результат:</h2>
+        <div th:utext="${result}">
+            Введите SQL-запрос для демонстрации.
+        </div>
+    </div>
+
+    <div class="examples">
+        <h3>Приклади команд (Музика):</h3>
+        <ul>
+            <li><strong>INSERT (CRUD):</strong> <code>INSERT INTO genres (name) VALUES ('Electronic');</code></li>
+            <li><strong>SELECT (CRUD):</strong> <code>SELECT id, name FROM groups;</code></li>
+            <li>
+                <strong>SQL Injection (DEMO):</strong> Спроба скинути таблицю.
+                <p><code>DROP TABLE songs;</code></p>
+            </li>
+            <li>
+                <strong>SQL Injection (DEMO):</strong> Обійти аутентифікацію (якщо ви мали б логін):
+                <p><code>' OR '1'='1</code></p>
+            </li>
+        </ul>
+    </div>
+
+    <div class="footer-link">
+        <p>Для безпечного додавання даних перейдіть до:</p>
+        <a href="/secure-add/">Інтерактивний Secure CRUD</a>
+    </div>
+</div>
+</body>
+</html>

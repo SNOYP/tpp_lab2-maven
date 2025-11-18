@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Інтерактивний CRUD (Безпечний)</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #e0e0e0; margin: 0; padding: 20px; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; background-color: #1e1e1e; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); }
+        h1 { color: #00bcd4; text-align: center; border-bottom: 2px solid #00bcd4; padding-bottom: 10px; margin-bottom: 30px; }
+        h3 { color: #bdbdbd; border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 30px; }
+        .form-section { background-color: #2a2a2a; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #ff9800; }
+        .form-group { margin-bottom: 15px; display: flex; align-items: center; }
+        .form-group label { flex: 0 0 150px; margin-right: 10px; font-weight: bold; color: #e0e0e0; }
+        .form-group input[type="text"], .form-group input[type="number"], .form-group select { flex-grow: 1; padding: 10px; border: 1px solid #555; border-radius: 4px; box-sizing: border-box; background-color: #333; color: #f0f0f0; }
+        button { background-color: #ff9800; color: #1e1e1e; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; transition: background-color 0.3s; }
+        button:hover { background-color: #f57c00; }
+        .message-box { padding: 15px; border-radius: 4px; margin-bottom: 20px; font-weight: bold; }
+        .success { background-color: #388e3c; border: 1px solid #4CAF50; color: #e8f5e9; }
+        .error { background-color: #d32f2f; border: 1px solid #F44336; color: #ffebee; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background-color: #2a2a2a; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #444; }
+        th { background-color: #333; color: #00bcd4; font-weight: 600; text-transform: uppercase; }
+        tr:hover { background-color: #3a3a3a; }
+
+        .table-container { margin-top: 40px; }
+
+        .footer-link { text-align: center; margin-top: 30px; }
+        .footer-link a { color: #00bcd4; text-decoration: none; transition: color 0.3s; }
+        .footer-link a:hover { color: #80deea; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎵 Інтерактивне Додавання Даних (Secure CRUD)</h1>
+
+    <div id="status-message" class="message-box" style="display:none;"></div>
+
+    <div th:if="${message.startsWith('❌')}" class="message-box error" th:text="${message}"></div>
+
+    <div class="form-section">
+        <h3>1. Додати Новий Жанр (genres)</h3>
+        <form id="genre-form" data-endpoint="/api/secure-add/add-genre">
+            <div class="form-group">
+                <label for="genre_name">Назва Жанру:</label>
+                <input type="text" id="genre_name" name="name" required placeholder="Наприклад, Metal">
+            </div>
+            <button type="submit">Додати Жанр</button>
+        </form>
+    </div>
+
+    <div class="form-section" th:if="${!genresList.isEmpty()}">
+        <h3>2. Додати Нову Групу (groups)</h3>
+        <form id="group-form" data-endpoint="/api/secure-add/add-group">
+
+            <div class="form-group">
+                <label for="group_genre_id">Вибрати Жанр:</label>
+                <select id="group_genre_id" name="genre_id" required>
+                    <option value="">-- Оберіть жанр --</option>
+                    <option th:each="genre : ${genresList}" th:value="${genre.key}" th:text="${genre.value}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="group_name">Назва Групи:</label>
+                <input type="text" id="group_name" name="name" required placeholder="Наприклад, Iron Maiden">
+            </div>
+
+            <button type="submit">Додати Групу</button>
+        </form>
+    </div>
+    <div class="form-section" th:if="${genresList.isEmpty()}">
+        <p style="color: #ff9800; font-weight: bold;">⚠️ Спочатку додайте хоча б один Жанр, щоб створити Групу.</p>
+    </div>
+
+    <div class="form-section" th:if="${!genresList.isEmpty()}">
+        <h3>3. Додати Нову Пісню (songs)</h3>
+        <form id="song-form" data-endpoint="/api/secure-add/add-song">
+
+            <div class="form-group">
+                <label for="filter_genre_id">Фільтр по Жанру:</label>
+                <select id="filter_genre_id">
+                    <option value="">-- Всі жанри --</option>
+                    <option th:each="genre : ${genresList}" th:value="${genre.key}" th:text="${genre.value}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="song_group_id">Вибрати Групу:</label>
+                <select id="song_group_id" name="group_id" required>
+                    <option value="">-- Оберіть групу --</option>
+                    <option th:each="group : ${groupsList}" th:value="${group.key}" th:text="${group.value}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="song_title">Назва Пісні:</label>
+                <input type="text" id="song_title" name="title" required placeholder="Наприклад, The Trooper">
+            </div>
+
+            <div class="form-group">
+                <label for="duration_seconds">Тривалість (сек):</label>
+                <input type="number" id="duration_seconds" name="duration_seconds" placeholder="Наприклад, 258" min="1">
+            </div>
+
+            <button type="submit">Додати Пісню</button>
+        </form>
+    </div>
+    <div class="form-section" th:if="${groupsList.isEmpty() && !genresList.isEmpty()}">
+        <p style="color: #ff9800; font-weight: bold;">⚠️ Спочатку додайте хоча б одну Групу, щоб створити Пісню.</p>
+    </div>
+
+    <div class="table-container">
+        <h2>📊 Існуючі Дані у Базі</h2>
+
+        <h3 style="color: #4CAF50;">Таблиця genres</h3>
+        <table th:if="${!currentGenres.isEmpty()}">
+            <thead>
+            <tr>
+                <th th:each="header : ${currentGenres[0].keySet()}" th:text="${header}">Header</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="row : ${currentGenres}">
+                <td th:each="data : ${row.values()}" th:text="${data}">Data</td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${currentGenres.isEmpty()}" style="color: #aaa;">Таблиця genres порожня.</p>
+
+        <h3 style="color: #4CAF50;">Таблиця groups</h3>
+        <table th:if="${!currentGroups.isEmpty()}">
+            <thead>
+            <tr>
+                <th th:each="header : ${currentGroups[0].keySet()}" th:text="${header}">Header</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="row : ${currentGroups}">
+                <td th:each="data : ${row.values()}" th:text="${data}">Data</td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${currentGroups.isEmpty()}" style="color: #aaa;">Таблиця groups порожня.</p>
+
+        <h3 style="color: #4CAF50;">Таблиця songs</h3>
+        <table th:if="${!currentSongs.isEmpty()}">
+            <thead>
+            <tr>
+                <th th:each="header : ${currentSongs[0].keySet()}" th:text="${header}">Header</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="row : ${currentSongs}">
+                <td th:each="data : ${row.values()}" th:text="${data}">Data</td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${currentSongs.isEmpty()}" style="color: #aaa;">Таблиця songs порожня.</p>
+    </div>
+
+    <div class="footer-link">
+        <p>Якщо вам потрібно продемонструвати SQL Injection:</p>
+        <a href="/vulnerable/">Перейти до Уразливого Інтерфейсу</a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const forms = document.querySelectorAll('.form-section form');
+        const statusMessage = document.getElementById('status-message');
+        const filterGenreSelect = document.getElementById('filter_genre_id');
+        const songGroupSelect = document.getElementById('song_group_id');
+
+        const initialGroups = Array.from(songGroupSelect.options).map(option => ({
+            value: option.value,
+            text: option.textContent
+        }));
+
+        forms.forEach(form => {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                const formData = new URLSearchParams(new FormData(this));
+                const endpoint = this.getAttribute('data-endpoint');
+
+                fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        return response.json().then(data => ({
+                            status: response.status,
+                            data: data
+                        }));
+                    })
+                    .then(({ status, data }) => {
+                        if (status === 200) {
+                            this.reset();
+                            showStatus('success', data.message);
+                            // Перезавантажити всю сторінку для оновлення списків (випадаючих та таблиць)
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            showStatus('error', data.message || 'Невідома помилка сервера.');
+                        }
+                    })
+                    .catch(error => {
+                        showStatus('error', 'Помилка мережі або підключення до API.');
+                        console.error('Fetch error:', error);
+                    });
+            });
+        });
+
+        if (filterGenreSelect && songGroupSelect) {
+            filterGenreSelect.addEventListener('change', function() {
+                const selectedGenreId = this.value;
+
+                // Якщо обрано "-- Всі жанри --" або нічого не обрано
+                if (!selectedGenreId || selectedGenreId === "") {
+                    // Відновлюємо початковий список
+                    songGroupSelect.innerHTML = '';
+                    initialGroups.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.value;
+                        option.textContent = item.text;
+                        songGroupSelect.appendChild(option);
+                    });
+                    return;
+                }
+
+                fetch(`/api/secure-add/groups-by-genre?genreId=${selectedGenreId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Помилка завантаження груп: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(groupsMap => {
+                        // Очищаємо список груп
+                        songGroupSelect.innerHTML = '<option value="">-- Оберіть групу --</option>';
+
+                        // Заповнюємо список відфільтрованими групами
+                        for (const id in groupsMap) {
+                            const name = groupsMap[id];
+                            const option = document.createElement('option');
+                            option.value = id;
+                            option.textContent = name;
+                            songGroupSelect.appendChild(option);
+                        }
+
+                        if (Object.keys(groupsMap).length === 0) {
+                            showStatus('error', 'Для обраного жанру групи відсутні. Додайте групу спочатку.', 5000);
+                        }
+
+                    })
+                    .catch(error => {
+                        showStatus('error', error.message || 'Не вдалося завантажити відфільтровані групи.', 5000);
+                        songGroupSelect.innerHTML = '<option value="">-- Помилка --</option>';
+                    });
+            });
+        }
+
+
+        function showStatus(type, message, timeout = 3000) {
+            statusMessage.className = `message-box ${type}`;
+            statusMessage.textContent = message;
+            statusMessage.style.display = 'block';
+
+            // Автоматично приховати повідомлення через заданий час
+            clearTimeout(statusMessage.timer);
+            statusMessage.timer = setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, timeout);
+        }
+    });
+</script>
+</body>
+</html>
